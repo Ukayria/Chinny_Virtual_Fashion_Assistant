@@ -1,0 +1,6 @@
+Flask
+mediapipe
+opencv-python
+numpy
+Pillow
+gunicorn

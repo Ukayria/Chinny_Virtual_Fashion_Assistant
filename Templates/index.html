@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chinny – The Virtual Fashion Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- Hero / Header -->
+    <header>
+        <h1 class="main-title">Chinny</h1>
+        <h2 class="sub-title"><i>The Virtual Fashion Assistant</i></h2>
+        <p class="subtitle">Your personal guide to stylish outfits and fabric costs</p>
+    </header>
+
+    <!-- Main Form -->
+    <main>
+        <form id="uploadForm">
+            <label for="style">Choose style preference:</label>
+            <select id="style" name="style">
+                <option value="Traditional">Traditional / Wedding</option>
+                <option value="Casual">Casual</option>
+                <option value="Office">Corporate / Office</option>
+            </select>
+
+            <input type="file" id="fileInput" name="file" accept="image/*" required>
+            <button type="submit">Upload</button>
+        </form>
+
+        <div class="results">
+            <h2>Detected Body Shape: <span id="shape"></span></h2>
+            <h2>Recommended Category: <span id="category"></span></h2>
+
+            <div id="recommendations"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2025 Chinny Fashion AI | Designed with love</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
