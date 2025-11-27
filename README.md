@@ -23,6 +23,7 @@ Chinny is a web app that helps people discover fashion styles that suit their bo
 
 **Future Plans**
 - Designers and tailors can post their designs with price estimates
+- Include male outfit suggestions/recommendations
 - Link to major style platforms like Pinterest for more inspiration
 - Add a digital marketplace feature so clients can contact designers directly
 
