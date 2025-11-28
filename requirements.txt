@@ -1,10 +1,9 @@
+flask
 ultralytics
+opencv-python-headless
+numpy
+pillow
 scikit-learn
 joblib
-pandas
-opencv-python
-numpy
-flask
 gunicorn
-Pillow
-mediapipe
+
