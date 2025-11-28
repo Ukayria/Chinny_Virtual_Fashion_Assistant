@@ -30,14 +30,30 @@ form.addEventListener("submit", async (e) => {
 
     const result = await resp.json();
 
-    // show shape & category (even if it's an error message like "Body not detected")
+    // update shape & category spans
     document.getElementById("shape").textContent = result.shape || "Unknown";
     document.getElementById("category").textContent = result.category || "Unknown";
+
+    // ensure a recommendation header exists (create if missing)
+    let header = document.getElementById("result-title");
+    if (!header) {
+      header = document.createElement("h2");
+      header.id = "result-title";
+      header.style.textAlign = "left";
+      header.style.maxWidth = "900px";
+      header.style.margin = "20px auto 0 auto";
+      const container = document.querySelector(".results");
+      container.insertBefore(header, container.querySelector("#recommendations"));
+    }
 
     const recDiv = document.getElementById("recommendations");
     recDiv.innerHTML = "";
 
-    if (!Array.isArray(result.recommendations) || result.recommendations.length === 0) {
+    const recs = Array.isArray(result.recommendations) ? result.recommendations : [];
+
+    header.textContent = `Chinny recommends these ${recs.length} outfit${recs.length===1?"":"s"} for your ${result.shape} shape`;
+
+    if (recs.length === 0) {
       const p = document.createElement("p");
       p.textContent = "No recommendations available.";
       recDiv.appendChild(p);
@@ -45,8 +61,9 @@ form.addEventListener("submit", async (e) => {
     }
 
     // build cards for each recommendation
-    result.recommendations.forEach(item => {
+    recs.forEach((item, idx) => {
       const box = document.createElement("div");
+      box.className = "rec-card";
       box.style.marginBottom = "20px";
       box.style.display = "inline-block";
       box.style.textAlign = "left";
@@ -56,12 +73,13 @@ form.addEventListener("submit", async (e) => {
       box.style.width = "300px";
       box.style.boxShadow = "0 2px 6px rgba(0,0,0,0.08)";
       box.style.marginRight = "12px";
+      box.style.verticalAlign = "top";
 
       // image 
       if (item.image) {
         const img = document.createElement("img");
         img.src = "/" + item.image.replace(/^\/+/, ""); 
-        img.width = 260;
+        img.style.width = "100%";
         img.style.borderRadius = "6px";
         img.style.display = "block";
         img.style.marginBottom = "8px";
@@ -84,6 +102,31 @@ form.addEventListener("submit", async (e) => {
       bd.innerHTML = `<strong>Breakdown:</strong><br>` + ((item.price_breakdown || []).join("<br>"));
       box.appendChild(bd);
 
+      // feedback row
+      const fbRow = document.createElement("div");
+      fbRow.style.marginTop = "10px";
+      const up = document.createElement("button");
+      up.textContent = "👍";
+      up.style.marginRight = "8px";
+      const down = document.createElement("button");
+      down.textContent = "👎";
+      const note = document.createElement("span");
+      note.id = `fb-note-${idx}`;
+      note.style.marginLeft = "12px";
+      note.style.color = "#666";
+      fbRow.appendChild(up);
+      fbRow.appendChild(down);
+      fbRow.appendChild(note);
+      box.appendChild(fbRow);
+
+      // handlers
+      up.addEventListener("click", async () => {
+        await sendFeedback(result.shape, result.category, item, 1, idx);
+      });
+      down.addEventListener("click", async () => {
+        await sendFeedback(result.shape, result.category, item, 0, idx);
+      });
+
       recDiv.appendChild(box);
     });
 
@@ -92,3 +135,27 @@ form.addEventListener("submit", async (e) => {
     alert("An unexpected error occurred. Check the browser console for details.");
   }
 });
+
+
+async function sendFeedback(shape, style, item, rating, idx) {
+  const payload = {
+    shape: shape,
+    style: style,
+    recommendation: item.name || item.image || "",
+    rating: rating
+  };
+  try {
+    const resp = await fetch("/feedback", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    if (resp.ok) {
+      document.getElementById(`fb-note-${idx}`).textContent = rating === 1 ? "Thanks — saved" : "Feedback noted";
+    } else {
+      document.getElementById(`fb-note-${idx}`).textContent = "Error saving feedback";
+    }
+  } catch (err) {
+    document.getElementById(`fb-note-${idx}`).textContent = "Network error";
+  }
+}

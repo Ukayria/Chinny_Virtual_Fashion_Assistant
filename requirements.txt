@@ -1,6 +1,10 @@
-Flask
-mediapipe
+ultralytics
+scikit-learn
+joblib
+pandas
 opencv-python
 numpy
-Pillow
+flask
 gunicorn
+Pillow
+mediapipe

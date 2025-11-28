@@ -131,3 +131,32 @@ def recommend_styles(body_shape, preference=None):
         })
 
     return category_folder, results
+
+# add to bottom of recommend.py
+from reward_model import score_texts as _score_texts
+
+def score_recommendations(recs):
+    """
+    Accepts list of recommendation dicts (each with 'name' and 'fabrics' etc).
+    If a trained reward model exists, scores and sorts recommendations.
+    Otherwise returns recs unchanged.
+    """
+    if not recs:
+        return recs
+
+    texts = []
+    for r in recs:
+        # build a short text representation for ranking
+        name = r.get("name", "")
+        fabrics = ", ".join(r.get("fabrics", []))
+        texts.append(f"{name} {fabrics}")
+
+    scores = _score_texts(texts)
+    if scores is None:
+        return recs
+
+    for r, s in zip(recs, scores):
+        r["score"] = float(round(s, 3))
+    recs.sort(key=lambda x: x.get("score", 0), reverse=True)
+    return recs
+
