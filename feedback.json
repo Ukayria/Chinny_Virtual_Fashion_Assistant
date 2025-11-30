@@ -106,5 +106,35 @@
     "style": "Corporate_Office_wears",
     "recommendation": "Office 2",
     "rating": 0
+  },
+  {
+    "shape": "Inverted Triangle",
+    "style": "Wedding_occasion",
+    "recommendation": "Occasion 4",
+    "rating": 1
+  },
+  {
+    "shape": "Inverted Triangle",
+    "style": "Wedding_occasion",
+    "recommendation": "Occasion 2",
+    "rating": 0
+  },
+  {
+    "shape": "Inverted Triangle",
+    "style": "Wedding_occasion",
+    "recommendation": "Occasion 1",
+    "rating": 0
+  },
+  {
+    "shape": "Inverted Triangle",
+    "style": "Corporate_Office_wears",
+    "recommendation": "Office 5",
+    "rating": 1
+  },
+  {
+    "shape": "Inverted Triangle",
+    "style": "Corporate_Office_wears",
+    "recommendation": "Office 6",
+    "rating": 0
   }
 ]

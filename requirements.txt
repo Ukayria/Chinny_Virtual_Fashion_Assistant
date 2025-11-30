@@ -6,4 +6,4 @@ pillow
 scikit-learn
 joblib
 gunicorn
-
+pandas
