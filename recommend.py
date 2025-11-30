@@ -2,10 +2,9 @@ import os
 import random
 import pandas as pd
 
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(os.path.abspath(file))
 PRICE_FILE = os.path.join(BASE_DIR, "data", "Fabric_Price.csv")
 
-# Load price CSV 
 price_df = pd.read_csv(PRICE_FILE)
 
 # build lookup (normalize)
