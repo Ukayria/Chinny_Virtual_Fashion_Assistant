@@ -7,7 +7,11 @@ from recommend import recommend_styles, score_recommendations
 from feedback_store import append_feedback
 from reward_model import train_reward_model
 
-app = Flask(__name__)
+import os
+from flask import Flask
+
+template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+app = Flask(__name__, template_folder=template_dir)
 
 BASE_DIR = os.path.dirname(__file__)
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
