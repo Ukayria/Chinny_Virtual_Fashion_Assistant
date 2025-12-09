@@ -3,7 +3,7 @@ import random
 import pandas as pd
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PRICE_FILE = os.path.join(BASE_DIR, "data", "Fabric_Price.csv")
+PRICE_FILE = os.path.join(BASE_DIR, "Data", "Fabric_Price.csv")
 
 price_df = pd.read_csv(PRICE_FILE)
 
