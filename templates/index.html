@@ -3,7 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <title>Chinny – The Virtual Fashion Assistant</title>
-    <link rel="stylesheet" href="../static/styles.css">
+    <!-- <link rel="stylesheet" href="../static/styles.css"> -->
+     <style>
+        /* GENERAL BODY */
+        body {
+            font-family: 'Playfair Display', 'Georgia', serif;
+            background-color: #F5F3EE; /* ivory background */
+            color: #4A4A48; /* warm charcoal text */
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        /* TITLE STYLING */
+        .main-title {
+            font-size: 70px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 2px;
+            color: #F5F3EE; /* soft ivory */
+            text-transform: uppercase;
+        }
+
+        .sub-title {
+            font-size: 26px;
+            font-weight: 300;
+            margin-top: 5px;
+            color: #D4B996; /* champagne gold */
+        }
+
+        /* HEADER */
+        header {
+            background: #2C3E2F; /* deep forest green */
+            color: #F5F3EE;
+            padding: 20px 20px 10px 20px; /* vertical padding */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-bottom: 2px solid #D4B996; /* subtle champagne line */
+            width: 100%; /* full width */
+            border-radius: 0; /* no rounded corners */
+        }
+
+        /* HEADER TITLE */
+        header h1 {
+            font-size: 2.5em; /* slightly smaller */
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* HEADER SUBTITLE */
+        header .subtitle {
+            font-size: 1em; /* reduced */
+            margin-top: 5px;
+            font-style: italic;
+            color: #D4B996; /* champagne accent */
+        }
+
+
+        /* FORM STYLING */
+        form {
+            margin: 40px auto;
+            padding: 30px 25px;
+            background-color: #F5F3EE; /* ivory */
+            display: inline-block;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            max-width: 450px;
+        }
+
+        select, input[type="file"], button {
+            padding: 12px 16px;
+            margin: 12px 5px;
+            border-radius: 12px;
+            border: 1px solid #D4B996; /* champagne borders */
+            font-size: 1em;
+            background-color: #F5F3EE;
+            color: #2C3E2F;
+        }
+
+        button {
+            background-color: #D4B996; /* champagne */
+            color: #2C3E2F; 
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            background-color: #C9B68E; /* slightly darker champagne */
+            transform: translateY(-2px);
+        }
+
+        /* RESULTS */
+        .results {
+            margin-top: 30px;
+        }
+
+        h2 {
+            margin: 15px 0;
+            color: #2C3E2F; /* deep forest green */
+            font-weight: 600;
+        }
+
+        /* RECOMMENDATION CARDS */
+        #recommendations {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        #recommendations div {
+            background-color: #F5F3EE; /* ivory cards */
+            border-radius: 20px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin: 15px;
+            width: 320px;
+            text-align: left;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        #recommendations div:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 32px rgba(0,0,0,0.12);
+        }
+
+        #recommendations img {
+            border-radius: 15px;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        #recommendations strong {
+            color: #2C3E2F; /* deep forest green highlights */
+        }
+
+        .price-title {
+            color: #D4B996; /* champagne price */
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        #recommendations p {
+            line-height: 1.5;
+        }
+
+        /* SPANS */
+        body span {
+            font-weight: 600;
+            color: #2C3E2F; /* deep forest green */
+        }
+
+        /* FOOTER */
+        footer {
+            background-color: #2C3E2F; /* deep forest green */
+            color: #D4B996; /* champagne text */
+            padding: 25px;
+            margin-top: 50px;
+            font-size: 0.9em;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            #recommendations div {
+                width: 90%;
+            }
+            form {
+                width: 90%;
+            }
+            .main-title {
+                font-size: 50px;
+            }
+            .sub-title {
+                font-size: 22px;
+            }
+        }
+
+     </style>
 </head>
 <body>
 
@@ -40,6 +220,170 @@
         <p>© 2025 Chinny Fashion AI | Designed with love</p>
     </footer>
 
-    <script src="../static/script.js"></script>
+    <!-- <script src="../static/script.js"></script> -->
+     <script>
+        // static/script.js
+        const form = document.getElementById("uploadForm");
+
+        form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const fileInput = document.getElementById("fileInput");
+        const styleSelect = document.getElementById("style");
+
+        if (fileInput.files.length === 0) {
+            alert("Please upload an image.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        formData.append("style", styleSelect.value);
+
+        try {
+            const resp = await fetch("/analyze", {
+            method: "POST",
+            body: formData
+            });
+
+            if (!resp.ok) {
+            const err = await resp.json().catch(()=>({error: "Server error"}));
+            alert(err.error || "Upload failed");
+            return;
+            }
+
+            const result = await resp.json();
+
+            // update shape & category spans
+            document.getElementById("shape").textContent = result.shape || "Unknown";
+            document.getElementById("category").textContent = result.category || "Unknown";
+
+            // ensure a recommendation header exists (create if missing)
+            let header = document.getElementById("result-title");
+            if (!header) {
+            header = document.createElement("h2");
+            header.id = "result-title";
+            header.style.textAlign = "left";
+            header.style.maxWidth = "900px";
+            header.style.margin = "20px auto 0 auto";
+            const container = document.querySelector(".results");
+            container.insertBefore(header, container.querySelector("#recommendations"));
+            }
+
+            const recDiv = document.getElementById("recommendations");
+            recDiv.innerHTML = "";
+
+            const recs = Array.isArray(result.recommendations) ? result.recommendations : [];
+
+            header.textContent = `Chinny recommends these ${recs.length} outfit${recs.length===1?"":"s"} for your ${result.shape} shape`;
+
+            if (recs.length === 0) {
+            const p = document.createElement("p");
+            p.textContent = "No recommendations available.";
+            recDiv.appendChild(p);
+            return;
+            }
+
+            // build cards for each recommendation
+            recs.forEach((item, idx) => {
+            const box = document.createElement("div");
+            box.className = "rec-card";
+            box.style.marginBottom = "20px";
+            box.style.display = "inline-block";
+            box.style.textAlign = "left";
+            box.style.border = "1px solid #ddd";
+            box.style.padding = "10px";
+            box.style.borderRadius = "8px";
+            box.style.width = "300px";
+            box.style.boxShadow = "0 2px 6px rgba(0,0,0,0.08)";
+            box.style.marginRight = "12px";
+            box.style.verticalAlign = "top";
+
+            // image 
+            if (item.image) {
+                const img = document.createElement("img");
+                img.src = "/" + item.image.replace(/^\/+/, ""); 
+                img.style.width = "100%";
+                img.style.borderRadius = "6px";
+                img.style.display = "block";
+                img.style.marginBottom = "8px";
+                box.appendChild(img);
+            }
+
+            const title = document.createElement("div");
+            title.className = "price-title";
+            title.textContent = `Cost per yard: ₦${item.price ?? "N/A"}`;
+            box.appendChild(title);
+
+            // fabrics list
+            const fab = document.createElement("div");
+            fab.style.marginBottom = "6px";
+            fab.innerHTML = `<strong>Fabrics:</strong> ${(item.fabrics || []).join(", ")}`;
+            box.appendChild(fab);
+
+            // breakdown lines
+            const bd = document.createElement("div");
+            bd.innerHTML = `<strong>Breakdown:</strong><br>` + ((item.price_breakdown || []).join("<br>"));
+            box.appendChild(bd);
+
+            // feedback row
+            const fbRow = document.createElement("div");
+            fbRow.style.marginTop = "10px";
+            const up = document.createElement("button");
+            up.textContent = "👍";
+            up.style.marginRight = "8px";
+            const down = document.createElement("button");
+            down.textContent = "👎";
+            const note = document.createElement("span");
+            note.id = `fb-note-${idx}`;
+            note.style.marginLeft = "12px";
+            note.style.color = "#666";
+            fbRow.appendChild(up);
+            fbRow.appendChild(down);
+            fbRow.appendChild(note);
+            box.appendChild(fbRow);
+
+            // handlers
+            up.addEventListener("click", async () => {
+                await sendFeedback(result.shape, result.category, item, 1, idx);
+            });
+            down.addEventListener("click", async () => {
+                await sendFeedback(result.shape, result.category, item, 0, idx);
+            });
+
+            recDiv.appendChild(box);
+            });
+
+        } catch (err) {
+            console.error(err);
+            alert("An unexpected error occurred. Check the browser console for details.");
+        }
+        });
+
+
+        async function sendFeedback(shape, style, item, rating, idx) {
+        const payload = {
+            shape: shape,
+            style: style,
+            recommendation: item.name || item.image || "",
+            rating: rating
+        };
+        try {
+            const resp = await fetch("/feedback", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(payload)
+            });
+            if (resp.ok) {
+            document.getElementById(`fb-note-${idx}`).textContent = rating === 1 ? "Thanks — saved" : "Feedback noted";
+            } else {
+            document.getElementById(`fb-note-${idx}`).textContent = "Error saving feedback";
+            }
+        } catch (err) {
+            document.getElementById(`fb-note-${idx}`).textContent = "Network error";
+        }
+        }
+
+     </script>
 </body>
 </html>
