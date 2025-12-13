@@ -4,8 +4,10 @@ import cv2
 import numpy as np
 
 # Try ultralytics YOLO pose
+# Allow disabling ultralytics via env var (useful on low-memory hosts like Render)
 _USE_ULTRALYTICS = False
 _pose_model = None
+_ENABLE_ULTRALYTICS = os.getenv("ENABLE_ULTRALYTICS", "1") == "1"
 
 try:
     from ultralytics import YOLO
@@ -26,7 +28,21 @@ except Exception:
 ###############################################
 #           LOAD YOLOv8 POSE MODEL
 ###############################################
-if _USE_ULTRALYTICS:
+def _init_pose_model_if_enabled():
+    """Lazily instantiate the YOLO pose model only if allowed by env var.
+
+    This avoids forcing a heavy model download/load at import time on low-memory
+    platforms. To enable ultralytics model loading set `ENABLE_ULTRALYTICS=1` in
+    the environment. To disable, set `ENABLE_ULTRALYTICS=0` (recommended for
+    many Render.com plans where memory is limited).
+    """
+    global _pose_model
+    if not (_USE_ULTRALYTICS and _ENABLE_ULTRALYTICS):
+        return
+
+    if _pose_model is not None:
+        return
+
     try:
         # First try local file
         local_path = os.path.join(os.getcwd(), "yolov8n-pose.pt")
