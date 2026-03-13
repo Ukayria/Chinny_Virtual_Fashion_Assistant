@@ -1,0 +1,9 @@
+flask
+ultralytics
+opencv-python-headless
+numpy
+pillow
+scikit-learn
+joblib
+gunicorn
+pandas
