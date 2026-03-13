@@ -1,6 +1,6 @@
-# Chinny: The Virtual Fashion Assistant
+# Chinny_VFA
 
-Chinny is a web app that helps people discover fashion styles that suit their body shapes. It makes choosing outfits faster and easier for both clients and tailors.
+Chinny is an AI tool that helps people discover fashion styles that suit their body shapes. It makes choosing outfits faster and easier for both clients and tailors.
 
 **Features**
 
