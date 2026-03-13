@@ -1,126 +1,98 @@
-# detect_shape.py  — pure OpenCV, no mediapipe / YOLO required
+# detect_shape.py — lightweight edge-based detection, no GrabCut/YOLO/MediaPipe
 import os
 import cv2
 import numpy as np
 
 
-###############################################
-#   SILHOUETTE-BASED BODY SHAPE DETECTION
-###############################################
-
-def _get_person_mask(img):
-    """
-    Returns a binary mask isolating the foreground person.
-    Uses GrabCut seeded from the image centre.
-    """
-    h, w = img.shape[:2]
-    mask = np.zeros((h, w), np.uint8)
-    bgd_model = np.zeros((1, 65), np.float64)
-    fgd_model = np.zeros((1, 65), np.float64)
-
-    # Seed rect: leave a small border so GrabCut has background to learn from
-    margin_x = int(w * 0.10)
-    margin_y = int(h * 0.05)
-    rect = (margin_x, margin_y, w - 2 * margin_x, h - 2 * margin_y)
-
-    try:
-        cv2.grabCut(img, mask, rect, bgd_model, fgd_model, 5, cv2.GC_INIT_WITH_RECT)
-        fg_mask = np.where((mask == cv2.GC_FGD) | (mask == cv2.GC_PR_FGD), 255, 0).astype(np.uint8)
-        return fg_mask
-    except Exception as e:
-        print(f"[detect_shape] GrabCut failed: {e}")
-        return None
+def _width_at_band(edge_mask, top, pct_lo, pct_hi, body_h):
+    """Average foreground width across a vertical band."""
+    widths = []
+    for pct in np.linspace(pct_lo, pct_hi, 9):
+        row_y = int(top + pct * body_h)
+        if row_y >= edge_mask.shape[0]:
+            continue
+        cols = np.where(edge_mask[row_y] > 0)[0]
+        if len(cols) >= 2:
+            widths.append(int(cols[-1] - cols[0]))
+    return int(np.median(widths)) if widths else 0
 
 
-def _measure_width_at_row(fg_mask, row_y):
-    """Return pixel width of the foreground region at a given row."""
-    if row_y < 0 or row_y >= fg_mask.shape[0]:
-        return 0
-    row = fg_mask[row_y, :]
-    cols = np.where(row > 127)[0]
-    if len(cols) < 2:
-        return 0
-    return int(cols[-1] - cols[0])
-
-
-def _classify_shape(shoulder_w, hip_w):
-    if hip_w == 0 or shoulder_w == 0:
+def _classify(shoulder_w, hip_w):
+    if shoulder_w == 0 or hip_w == 0:
         return "Unknown"
     ratio = shoulder_w / hip_w
-    print(f"[detect_shape] shoulder_w={shoulder_w}, hip_w={hip_w}, ratio={ratio:.3f}")
+    print(f"[detect_shape] shoulder={shoulder_w}px  hip={hip_w}px  ratio={ratio:.3f}")
     if ratio >= 1.10:
         return "Inverted Triangle"
     elif ratio <= 0.92:
         return "Pear"
-    elif 0.92 < ratio <= 1.05:
+    elif ratio <= 1.05:
         return "Rectangle"
     else:
         return "Hourglass"
 
 
-def _detect_via_silhouette(img):
-    """
-    Estimate body shape by measuring silhouette width at shoulder and hip levels.
-    Samples several rows around the expected anatomical positions and averages them.
-    """
-    h, w = img.shape[:2]
-
-    fg_mask = _get_person_mask(img)
-    if fg_mask is None:
-        return "Unknown"
-
-    # Find the vertical extent of the foreground blob
-    rows_with_fg = np.where(fg_mask.max(axis=1) > 127)[0]
-    if len(rows_with_fg) < 20:
-        print("[detect_shape] Silhouette too small — try a clearer full-body photo")
-        return "Unknown"
-
-    top_row = int(rows_with_fg[0])
-    bot_row = int(rows_with_fg[-1])
-    body_h  = bot_row - top_row
-
-    # Shoulder zone: 18–26 % down the body height
-    # Hip zone:      55–65 % down the body height
-    def avg_width(pct_lo, pct_hi):
-        widths = []
-        for pct in np.linspace(pct_lo, pct_hi, 7):
-            row_y = int(top_row + pct * body_h)
-            ww = _measure_width_at_row(fg_mask, row_y)
-            if ww > 0:
-                widths.append(ww)
-        return int(np.median(widths)) if widths else 0
-
-    shoulder_w = avg_width(0.18, 0.26)
-    hip_w      = avg_width(0.55, 0.65)
-
-    print(f"[detect_shape] Silhouette — shoulder_w={shoulder_w}, hip_w={hip_w}")
-    if shoulder_w == 0 or hip_w == 0:
-        return "Unknown"
-
-    return _classify_shape(shoulder_w, hip_w)
-
-
-###############################################
-#         MAIN DETECTION FUNCTION
-###############################################
 def detect_body_shape(image_path):
     print(f"[detect_shape] Processing: {image_path}")
 
     img = cv2.imread(image_path)
     if img is None:
-        print(f"[detect_shape] Could not read image: {image_path}")
+        print("[detect_shape] Could not read image")
         return "Unknown"
 
+    # ── Resize to max 600px — fast & low-memory ──
     h, w = img.shape[:2]
-    print(f"[detect_shape] Image size: {w}x{h}")
-
-    # Resize very large images for speed (GrabCut is slow on 4K images)
-    max_dim = 800
+    max_dim = 600
     if max(h, w) > max_dim:
         scale = max_dim / max(h, w)
-        img = cv2.resize(img, (int(w * scale), int(h * scale)))
-        print(f"[detect_shape] Resized to {img.shape[1]}x{img.shape[0]}")
+        img = cv2.resize(img, (int(w * scale), int(h * scale)),
+                         interpolation=cv2.INTER_AREA)
+    h, w = img.shape[:2]
+    print(f"[detect_shape] Working size: {w}x{h}")
 
-    shape = _detect_via_silhouette(img)
+    # ── Convert to grayscale, blur, edge detect ──
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blur, 30, 90)
+
+    # ── Morphological close to fill silhouette gaps ──
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
+    closed = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+
+    # ── Find the largest contour (= person) ──
+    contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL,
+                                   cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        print("[detect_shape] No contours found")
+        return "Unknown"
+
+    biggest = max(contours, key=cv2.contourArea)
+    if cv2.contourArea(biggest) < (h * w * 0.05):
+        print("[detect_shape] Largest contour too small — poor background contrast")
+        return "Unknown"
+
+    # ── Build filled mask from contour ──
+    mask = np.zeros((h, w), dtype=np.uint8)
+    cv2.drawContours(mask, [biggest], -1, 255, thickness=cv2.FILLED)
+
+    # ── Find vertical extent of the person ──
+    rows = np.where(mask.max(axis=1) > 0)[0]
+    if len(rows) < 20:
+        print("[detect_shape] Mask too thin")
+        return "Unknown"
+
+    top_row = int(rows[0])
+    bot_row = int(rows[-1])
+    body_h  = bot_row - top_row
+
+    # ── Sample shoulder (18–26%) and hip (55–65%) bands ──
+    shoulder_w = _width_at_band(mask, top_row, 0.18, 0.26, body_h)
+    hip_w      = _width_at_band(mask, top_row, 0.55, 0.65, body_h)
+
+    if shoulder_w == 0 or hip_w == 0:
+        print("[detect_shape] Could not measure widths — try a photo with plain background")
+        return "Unknown"
+
+    shape = _classify(shoulder_w, hip_w)
     print(f"[detect_shape] Result: {shape}")
     return shape
