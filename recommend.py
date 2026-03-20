@@ -54,7 +54,7 @@ def prettify_name(filename):
     return name
 
 def recommend_styles(body_shape, preference=None):
-    base_folder = os.path.join(BASE_DIR, "static", "styles")
+    base_folder = os.path.join(BASE_DIR, "Static", "styles")
 
     shape_mapping = {
         "Hourglass": "Wedding_occasion",
