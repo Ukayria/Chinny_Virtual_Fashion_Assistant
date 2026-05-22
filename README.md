@@ -16,7 +16,6 @@ Chinny is an AI tool that helps people discover clothes that suit their body sha
 - Select a style category
 - App detects your body shape and shows recommended styles, fabrics, and prices
 
-
 **Installation**
 - Clone the repository:
 git clone https://github.com/Ukayria/Chinny_Virtual_Fashion_Assistant.git
