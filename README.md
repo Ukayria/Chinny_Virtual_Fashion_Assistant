@@ -1,31 +1,21 @@
 # Chinny_VFA
 
-Chinny is an AI tool that helps people discover fashion styles that suit their body shapes. It makes choosing outfits faster and easier for both clients and tailors.
+Chinny is an AI tool that helps people discover clothes that suit their body shapes.
 
 **Features**
 
-* Detects body shape from a photo
+- Detects body shape from a photo
 
 - Recommends styles in three categories: Casual, Corporate/Office, Traditional/Wedding
 
 - Shows fabrics used for each outfit, with price per yard
 
-- Simplifies decisions for clients
-
-- Streamlines communication between clients and tailors
-
 **How it Works**
 
 - Upload a clear full-body photo
 - Select a style category
-- Chinny detects your body shape and shows recommended styles, fabrics, and prices
-- The recommendations appear as elegant cards with images and details for easy comparison.
+- App detects your body shape and shows recommended styles, fabrics, and prices
 
-**Future Plans**
-- Designers and tailors can post their designs with price estimates
-- Include male outfit suggestions/recommendations
-- Link to major style platforms like Pinterest for more inspiration
-- Add a digital marketplace feature so clients can contact designers directly
 
 **Installation**
 - Clone the repository:
