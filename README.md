@@ -1,4 +1,4 @@
-# Chinny_VFA — Virtual Fashion Assistant
+# Chinny_Virtual Fashion Assistant
 
 > **An AI-powered virtual fashion assistant that provides personalized clothing recommendations using computer vision.**
 
